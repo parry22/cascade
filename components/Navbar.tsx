@@ -1,11 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +17,13 @@ export default function Navbar() {
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("walletConnected") === "true"
+      setIsWalletConnected(stored)
+    } catch {}
   }, [])
 
   const handleMobileNavClick = (sectionId: string) => {
@@ -32,7 +42,20 @@ export default function Navbar() {
   }
 
   const handleWalletConnect = () => {
-    setIsWalletConnected(!isWalletConnected)
+    const next = !isWalletConnected
+    setIsWalletConnected(next)
+    try {
+      localStorage.setItem("walletConnected", next ? "true" : "false")
+      localStorage.setItem("walletAddress", next ? "0x1234...5678" : "")
+    } catch {}
+    // Broadcast for other pages/components to react
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("wallet-connection-change", {
+          detail: { connected: next, address: next ? "0x1234...5678" : "" },
+        }),
+      )
+    }
   }
 
   return (
@@ -88,16 +111,27 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="text-white/80 hover:text-white"
+            aria-label="Toggle theme"
+            title="Toggle theme"
+          >
+            {theme === "dark" ? "Light" : "Dark"}
+          </Button>
+          <Button
+            size="sm"
             onClick={handleWalletConnect}
-            className={`rounded-lg font-medium relative cursor-pointer hover:-translate-y-0.5 transition-all duration-200 inline-block text-center px-4 py-2 text-sm border ${
+            className={
               isWalletConnected
-                ? "bg-green-500/20 border-green-400/30 text-green-300 hover:bg-green-500/30"
-                : "bg-gradient-to-r from-blue-900 to-blue-600 border-blue-400/30 text-white hover:from-blue-800 hover:to-blue-500"
-            }`}
+                ? "bg-white text-black hover:bg-white"
+                : "bg-black text-white hover:bg-white hover:text-black"
+            }
           >
             {isWalletConnected ? "0x1234...5678" : "Connect Wallet"}
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -133,7 +167,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 transition-colors hover:bg-white/10"
+          className="flex items-center justify-center w-10 h-10 rounded-[20px] border border-white/20 transition-colors hover:bg-white/10"
           aria-label="Toggle menu"
           style={{ background: "rgba(255, 255, 255, 0.05)" }}
         >
@@ -184,16 +218,17 @@ export default function Navbar() {
                 Registry
               </a>
               <div className="border-t border-white/20 pt-4 mt-4 flex flex-col space-y-3">
-                <button
+                <Button
                   onClick={handleWalletConnect}
-                  className={`px-4 py-3 text-lg font-bold text-center rounded-lg transition-all duration-200 border ${
+                  className={
                     isWalletConnected
-                      ? "bg-green-500/20 border-green-400/30 text-green-300"
-                      : "bg-gradient-to-r from-blue-900 to-blue-600 border-blue-400/30 text-white"
-                  }`}
+                      ? "bg-white text-black hover:bg-white"
+                      : "bg-black text-white hover:bg-white hover:text-black"
+                  }
+                  size="sm"
                 >
                   {isWalletConnected ? "0x1234...5678" : "Connect Wallet"}
-                </button>
+                </Button>
               </div>
             </nav>
           </div>

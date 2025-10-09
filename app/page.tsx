@@ -1,5 +1,7 @@
 import GradientBlinds from "@/components/GradientBlinds"
 import Navbar from "@/components/Navbar"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function Home() {
   return (
@@ -30,24 +32,37 @@ export default function Home() {
           <div className="flex items-center justify-center min-h-screen w-full px-5 sm:px-20">
             <div className="relative z-10 flex max-w-4xl flex-col items-center gap-8 text-center">
               <h1 className="text-5xl font-bold leading-tight tracking-tight text-white md:text-7xl text-balance drop-shadow-2xl">
-                The Future of Crypto
+                The Future of RWAs
                 <br />
-                Trading Starts Here
+                Starts Here
               </h1>
               <p className="text-xl text-white/90 max-w-3xl text-pretty drop-shadow-lg">
-                Access hundreds of digital assets with real-time charts, deep liquidity, and lightning-fast execution.
+                Access highest yields on your RWAs in the market + Lowest Collateral loans by pledging your assets.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <button className="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-black transition-all hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent shadow-2xl">
-                  Start Trading
-                </button>
-                <button className="inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 px-8 py-4 text-lg font-semibold text-white backdrop-blur transition-all hover:bg-white/20 hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent shadow-xl">
-                  Explore Markets
-                  <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <Button size="lg" className="bg-white text-black hover:bg-white/90">
+                  Join Waitlist
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+                >
+                  <Link href="/testnet">
+                    Explore Testnet
+                    <svg
+                      className="ml-2 h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
