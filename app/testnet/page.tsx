@@ -168,7 +168,7 @@ export default function RWALendingMarket() {
     <main className="relative min-h-screen bg-black text-white">
       <Navbar />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-24 pb-10">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-24 pb-10">
         {/* Top heading and summary metrics */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-3xl md:text-4xl font-bold">RWA Lending Market</h1>
@@ -187,172 +187,139 @@ export default function RWALendingMarket() {
           </div>
         </div>
 
-        {/* Monochrome banner (no gradients, minimal) */}
-        <div className="mt-4 w-full rounded-xl bg-white/5 p-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="text-sm md:text-base">
-              <span className="font-semibold">RWA Supply & Borrow Campaign</span> — Earn boosted APY on Treasuries and
-              Private Credit allocations during testnet.
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                className="bg-white text-black hover:opacity-90"
-                onClick={() => toast({ title: "Campaign", description: "Campaign details coming soon." })}
-              >
-                View Details
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-white/25 text-white hover:bg-white/10 bg-transparent"
-                onClick={() => toast({ title: "Bonus", description: "Bonus enrollment simulated." })}
-              >
-                Enroll
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters + Search */}
-        <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`px-3 py-1.5 text-sm rounded-[20px] transition ${
-                  activeFilter === f ? "bg-white text-black font-semibold" : "bg-white/5 text-white hover:bg-white/10"
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-          <div className="w-full md:w-80">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search RWAs"
-              className="w-full bg-white/5 px-3 py-2 text-sm placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/30"
-            />
-          </div>
-        </div>
-
         {/* Main 2-column layout */}
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mt-6 grid grid-cols-1 items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_360px]">
           {/* Left: Table */}
-          <section aria-label="RWA table">
-            <div className="w-full overflow-x-auto rounded-xl bg-white/5">
-              <div className="min-w-[920px]">
-                {/* Header row */}
-                <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px] px-4 py-3 text-xs uppercase tracking-wide text-white/60">
-                  <div>Assets</div>
-                  <div>Supply</div>
-                  <div>Borrow</div>
-                  <div>Supply APR</div>
-                  <div>Borrow APR</div>
-                  <div className="text-right pr-2">Actions</div>
-                </div>
-                {/* Body */}
-                <div className="divide-y divide-white/10">
-                  {filtered.map((a) => {
-                    const pos = positions[a.symbol] || { supplied: 0, borrowed: 0 }
-                    const isExpanded = expandedRow?.symbol === a.symbol
-                    return (
-                      <div key={a.symbol} className="px-4">
-                        <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px] items-center py-4">
-                          {/* Asset */}
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="h-8 w-8 grid place-items-center rounded-full bg-white/10 text-xs font-bold">
-                              {a.symbol}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="truncate font-medium">{a.name}</div>
-                              <div className="text-xs text-white/60">{fmt(a.price)}</div>
-                            </div>
-                          </div>
-                          {/* Supply */}
-                          <div className="min-w-0">
-                            <div className="truncate">{a.supply.toLocaleString()}</div>
-                            <div className="text-xs text-white/60">{fmt(a.supplyUSD)}</div>
-                          </div>
-                          {/* Borrow */}
-                          <div className="min-w-0">
-                            <div className="truncate">{a.borrow.toLocaleString()}</div>
-                            <div className="text-xs text-white/60">{fmt(a.borrowUSD)}</div>
-                          </div>
-                          {/* APRs */}
-                          <div className="min-w-0">{fmtPct(a.supplyAPR)}</div>
-                          <div className="min-w-0">{fmtPct(a.borrowAPR)}</div>
-                          {/* Actions */}
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-white text-black hover:opacity-90"
-                              onClick={() => openRow(a.symbol, "borrow")}
-                            >
-                              Borrow
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-white/25 hover:bg-white/10 bg-transparent"
-                              onClick={() => openRow(a.symbol, "supply")}
-                            >
-                              Supply
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Inline row expander (no card borders) */}
-                        {isExpanded && (
-                          <div className="pb-4">
-                            <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
-                              <div>
-                                <label className="mb-1 block text-xs text-white/70">
-                                  {expandedRow?.mode === "supply" ? "Supply Amount (USD)" : "Borrow Amount (USD)"}
-                                </label>
-                                <input
-                                  type="number"
-                                  min={0}
-                                  value={actionAmount || ""}
-                                  onChange={(e) => setActionAmount(Number(e.target.value))}
-                                  className="w-full bg-white/5 px-3 py-2 text-sm placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/30"
-                                  placeholder="0.00"
-                                />
-                                <div className="mt-1 text-xs text-white/60">
-                                  Current Position — Supplied {fmt(pos.supplied)} • Borrowed {fmt(pos.borrowed)}
+          <section aria-label="RWA table" className="h-full">
+            {/* Keep height fill; only allow horizontal scroll on small screens.
+                 On md+ make x-overflow visible and remove forcing min-width. */}
+            <div className="h-full rounded-xl bg-white/5 flex flex-col overflow-hidden">
+              <div className="px-4 py-3 text-xs uppercase tracking-wide text-white/60 hidden md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px]">
+                <div>Assets</div>
+                <div>Supply</div>
+                <div>Borrow</div>
+                <div>Supply APR</div>
+                <div>Borrow APR</div>
+                <div className="text-right pr-2">Actions</div>
+              </div>
+              {/* Header + body inside horizontal scroll container for small screens */}
+              <div className="flex-1 overflow-hidden">
+                {/* was: className="h-full overflow-x-auto"
+                            now: keep x-scroll on small, disable on md+ */}
+                <div className="h-full overflow-x-auto md:overflow-x-visible">
+                  {/* was: className="min-w-[920px] h-full flex flex-col"
+                              now: keep min-w only on small, fill width on md+ */}
+                  <div className="min-w-[920px] md:min-w-0 md:w-full h-full flex flex-col">
+                    {/* Header row (visible on small screens too) */}
+                    <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px] px-4 py-3 text-xs uppercase tracking-wide text-white/60 md:hidden">
+                      <div>Assets</div>
+                      <div>Supply</div>
+                      <div>Borrow</div>
+                      <div>Supply APR</div>
+                      <div>Borrow APR</div>
+                      <div className="text-right pr-2">Actions</div>
+                    </div>
+                    {/* Body */}
+                    <div className="flex-1 overflow-y-auto divide-y divide-white/10">
+                      {filtered.map((a) => {
+                        const pos = positions[a.symbol] || { supplied: 0, borrowed: 0 }
+                        const isExpanded = expandedRow?.symbol === a.symbol
+                        return (
+                          <div key={a.symbol} className="px-4">
+                            <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px] items-center py-4">
+                              {/* Asset */}
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="h-8 w-8 grid place-items-center rounded-full bg-white/10 text-xs font-bold">
+                                  {a.symbol}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="truncate font-medium">{a.name}</div>
+                                  <div className="text-xs text-white/60">{fmt(a.price)}</div>
                                 </div>
                               </div>
-                              <div className="flex items-end justify-end gap-2">
+                              {/* Supply */}
+                              <div className="min-w-0">
+                                <div className="truncate">{a.supply.toLocaleString()}</div>
+                                <div className="text-xs text-white/60">{fmt(a.supplyUSD)}</div>
+                              </div>
+                              {/* Borrow */}
+                              <div className="min-w-0">
+                                <div className="truncate">{a.borrow.toLocaleString()}</div>
+                                <div className="text-xs text-white/60">{fmt(a.borrowUSD)}</div>
+                              </div>
+                              {/* APRs */}
+                              <div className="min-w-0">{fmtPct(a.supplyAPR)}</div>
+                              <div className="min-w-0">{fmtPct(a.borrowAPR)}</div>
+                              {/* Actions */}
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  className="bg-white text-black hover:opacity-90"
+                                  onClick={() => openRow(a.symbol, "borrow")}
+                                >
+                                  Borrow
+                                </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   className="border-white/25 hover:bg-white/10 bg-transparent"
-                                  onClick={() => setExpandedRow(null)}
+                                  onClick={() => openRow(a.symbol, "supply")}
                                 >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={confirmAction}
-                                  disabled={loading || !walletConnected}
-                                  className={
-                                    loading || !walletConnected
-                                      ? "bg-white/20 text-white/70 cursor-not-allowed"
-                                      : "bg-white text-black hover:opacity-90"
-                                  }
-                                >
-                                  {loading ? "Processing…" : "Confirm"}
+                                  Supply
                                 </Button>
                               </div>
                             </div>
+
+                            {/* Inline row expander (no card borders) */}
+                            {isExpanded && (
+                              <div className="pb-4">
+                                <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
+                                  <div>
+                                    <label className="mb-1 block text-xs text-white/70">
+                                      {expandedRow?.mode === "supply" ? "Supply Amount (USD)" : "Borrow Amount (USD)"}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      value={actionAmount || ""}
+                                      onChange={(e) => setActionAmount(Number(e.target.value))}
+                                      className="w-full bg-white/5 px-3 py-2 text-sm placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/30"
+                                      placeholder="0.00"
+                                    />
+                                    <div className="mt-1 text-xs text-white/60">
+                                      Current Position — Supplied {fmt(pos.supplied)} • Borrowed {fmt(pos.borrowed)}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-end justify-end gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="border-white/25 hover:bg-white/10 bg-transparent"
+                                      onClick={() => setExpandedRow(null)}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={confirmAction}
+                                      disabled={loading || !walletConnected}
+                                      className={
+                                        loading || !walletConnected
+                                          ? "bg-white/20 text-white/70 cursor-not-allowed"
+                                          : "bg-white text-black hover:opacity-90"
+                                      }
+                                    >
+                                      {loading ? "Processing…" : "Confirm"}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    )
-                  })}
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

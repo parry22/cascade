@@ -1,20 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
-  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -26,21 +20,6 @@ export default function Navbar() {
     } catch {}
   }, [])
 
-  const handleMobileNavClick = (sectionId: string) => {
-    setIsMobileMenuOpen(false)
-    const element = document.getElementById(sectionId)
-    if (element) {
-      const headerOffset = 120
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-      const offsetPosition = elementPosition - headerOffset
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      })
-    }
-  }
-
   const handleWalletConnect = () => {
     const next = !isWalletConnected
     setIsWalletConnected(next)
@@ -48,7 +27,6 @@ export default function Navbar() {
       localStorage.setItem("walletConnected", next ? "true" : "false")
       localStorage.setItem("walletAddress", next ? "0x1234...5678" : "")
     } catch {}
-    // Broadcast for other pages/components to react
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("wallet-connection-change", {
@@ -60,10 +38,10 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop Header */}
+      {/* Desktop Header - logo left, wallet right */}
       <header
-        className={`fixed top-4 z-[9999] mx-auto hidden w-full flex-row items-center justify-between self-start rounded-full backdrop-blur-md md:flex border transition-all duration-300 ${
-          isScrolled ? "max-w-4xl px-2 border-white/20 shadow-lg" : "max-w-6xl px-4 border-transparent shadow-none"
+        className={`fixed top-4 z-[9999] mx-auto hidden w-full items-center justify-between rounded-full backdrop-blur-md md:flex border transition-all duration-300 ${
+          isScrolled ? "max-w-4xl px-4 border-white/20 shadow-lg" : "max-w-6xl px-6 border-transparent shadow-none"
         } py-2`}
         style={{
           willChange: "transform",
@@ -75,10 +53,9 @@ export default function Navbar() {
           transform: "translateX(-50%)",
         }}
       >
+        {/* v0 logo */}
         <a
-          className={`z-50 flex items-center justify-center gap-2 transition-all duration-300 ${
-            isScrolled ? "ml-4" : ""
-          }`}
+          className="z-50 flex items-center justify-center gap-2"
           href="https://v0.app"
           target="_blank"
           rel="noopener noreferrer"
@@ -95,49 +72,25 @@ export default function Navbar() {
           </svg>
         </a>
 
-        <div className="absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-white/70 transition duration-200 hover:text-white md:flex md:space-x-2">
-          <a className="relative px-4 py-2 text-white/70 hover:text-white transition-colors cursor-pointer" href="/">
-            <span className="relative z-20">Create Token</span>
-          </a>
-          <a className="relative px-4 py-2 text-white/70 hover:text-white transition-colors cursor-pointer" href="/">
-            <span className="relative z-20">Create Pool</span>
-          </a>
-          <a className="relative px-4 py-2 text-white/70 hover:text-white transition-colors cursor-pointer" href="/">
-            <span className="relative z-20">Swap</span>
-          </a>
-          <a className="relative px-4 py-2 text-white/70 hover:text-white transition-colors cursor-pointer" href="/">
-            <span className="relative z-20">Registry</span>
-          </a>
-        </div>
-
+        {/* Wallet button only */}
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-white/80 hover:text-white"
-            aria-label="Toggle theme"
-            title="Toggle theme"
-          >
-            {theme === "dark" ? "Light" : "Dark"}
-          </Button>
           <Button
             size="sm"
             onClick={handleWalletConnect}
-            className={
+            className={`rounded-[20px] ${
               isWalletConnected
                 ? "bg-white text-black hover:bg-white"
                 : "bg-black text-white hover:bg-white hover:text-black"
-            }
+            }`}
           >
             {isWalletConnected ? "0x1234...5678" : "Connect Wallet"}
           </Button>
         </div>
       </header>
 
-      {/* Mobile Header */}
+      {/* Mobile Header - logo left, wallet right */}
       <header
-        className={`fixed top-4 z-[9999] mx-4 flex w-auto flex-row items-center justify-between rounded-full backdrop-blur-md md:hidden px-4 py-3 border transition-all duration-300 ${
+        className={`fixed top-4 z-[9999] mx-4 flex w-auto items-center justify-between rounded-full backdrop-blur-md md:hidden px-4 py-3 border transition-all duration-300 ${
           isScrolled ? "border-white/20 shadow-lg" : "border-transparent shadow-none"
         }`}
         style={{
@@ -165,75 +118,18 @@ export default function Navbar() {
           <span className="text-white font-semibold">v0</span>
         </a>
 
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex items-center justify-center w-10 h-10 rounded-[20px] border border-white/20 transition-colors hover:bg-white/10"
-          aria-label="Toggle menu"
-          style={{ background: "rgba(255, 255, 255, 0.05)" }}
+        <Button
+          onClick={handleWalletConnect}
+          size="sm"
+          className={`rounded-[20px] ${
+            isWalletConnected
+              ? "bg-white text-black hover:bg-white"
+              : "bg-black text-white hover:bg-white hover:text-black"
+          }`}
         >
-          <div className="flex flex-col items-center justify-center w-5 h-5 space-y-1">
-            <span
-              className={`block w-4 h-0.5 bg-foreground transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`}
-            ></span>
-            <span
-              className={`block w-4 h-0.5 bg-foreground transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""}`}
-            ></span>
-            <span
-              className={`block w-4 h-0.5 bg-foreground transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
-            ></span>
-          </div>
-        </button>
+          {isWalletConnected ? "0x1234...5678" : "Connect Wallet"}
+        </Button>
       </header>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm md:hidden">
-          <div
-            className="absolute top-24 left-4 right-4 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-6"
-            style={{ background: "rgba(255, 255, 255, 0.1)" }}
-          >
-            <nav className="flex flex-col space-y-4">
-              <a
-                href="/"
-                className="text-left px-4 py-3 text-lg font-medium text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-              >
-                Create Token
-              </a>
-              <a
-                href="/"
-                className="text-left px-4 py-3 text-lg font-medium text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-              >
-                Create Pool
-              </a>
-              <a
-                href="/"
-                className="text-left px-4 py-3 text-lg font-medium text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-              >
-                Swap
-              </a>
-              <a
-                href="/"
-                className="text-left px-4 py-3 text-lg font-medium text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-              >
-                Registry
-              </a>
-              <div className="border-t border-white/20 pt-4 mt-4 flex flex-col space-y-3">
-                <Button
-                  onClick={handleWalletConnect}
-                  className={
-                    isWalletConnected
-                      ? "bg-white text-black hover:bg-white"
-                      : "bg-black text-white hover:bg-white hover:text-black"
-                  }
-                  size="sm"
-                >
-                  {isWalletConnected ? "0x1234...5678" : "Connect Wallet"}
-                </Button>
-              </div>
-            </nav>
-          </div>
-        </div>
-      )}
     </>
   )
 }
