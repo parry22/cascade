@@ -16,8 +16,12 @@ type RWAAsset = {
   borrowUSD: number
   supplyAPR: number
   borrowAPR: number
+  image: string // added
 }
 
+const FILTERS = ["All", "Treasuries", "Private Credit", "Real Estate", "Commodities", "RWA"]
+
+// New: module-scoped asset list used by the component
 const RWA_ASSETS: RWAAsset[] = [
   {
     symbol: "UST",
@@ -30,6 +34,7 @@ const RWA_ASSETS: RWAAsset[] = [
     borrowUSD: 67_470_000,
     supplyAPR: 5.12,
     borrowAPR: 2.31,
+    image: "/images/rwas/treasuries.jpg",
   },
   {
     symbol: "PRIV",
@@ -42,6 +47,7 @@ const RWA_ASSETS: RWAAsset[] = [
     borrowUSD: 2_860_000,
     supplyAPR: 8.4,
     borrowAPR: 3.28,
+    image: "/images/rwas/private-credit.jpg",
   },
   {
     symbol: "REIT",
@@ -54,6 +60,7 @@ const RWA_ASSETS: RWAAsset[] = [
     borrowUSD: 83_950_000,
     supplyAPR: 6.12,
     borrowAPR: 4.7,
+    image: "/images/rwas/real-estate.jpg",
   },
   {
     symbol: "GOLD",
@@ -66,10 +73,9 @@ const RWA_ASSETS: RWAAsset[] = [
     borrowUSD: 25_730_000,
     supplyAPR: 1.82,
     borrowAPR: 0.43,
+    image: "/images/rwas/gold.jpg",
   },
 ]
-
-const FILTERS = ["All", "Treasuries", "Private Credit", "Real Estate", "Commodities", "RWA"]
 
 type PositionMap = Record<string, { supplied: number; borrowed: number }>
 
@@ -229,9 +235,13 @@ export default function RWALendingMarket() {
                             <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px] items-center py-4">
                               {/* Asset */}
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="h-8 w-8 grid place-items-center rounded-full bg-white/10 text-xs font-bold">
-                                  {a.symbol}
-                                </div>
+                                <img
+                                  src={a.image || "/placeholder.svg"}
+                                  alt={a.name}
+                                  width={32}
+                                  height={32}
+                                  className="h-8 w-8 rounded object-cover"
+                                />
                                 <div className="min-w-0">
                                   <div className="truncate font-medium">{a.name}</div>
                                   <div className="text-xs text-white/60">{fmt(a.price)}</div>

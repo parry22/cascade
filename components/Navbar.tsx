@@ -2,10 +2,27 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
+  const pathname = usePathname()
+
+  const NavItem = ({ href, label }: { href: string; label: string }) => {
+    const active = pathname === href
+    return (
+      <Link
+        href={href}
+        className={`rounded-[20px] px-3 py-1 text-sm transition-colors ${
+          active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-foreground/10"
+        }`}
+      >
+        {label}
+      </Link>
+    )
+  }
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -38,7 +55,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop Header - logo left, wallet right */}
+      {/* Desktop Header - logo left, nav centered, wallet right */}
       <header
         className={`fixed top-4 z-[9999] mx-auto hidden w-full items-center justify-between rounded-full backdrop-blur-md md:flex border transition-all duration-300 ${
           isScrolled ? "max-w-4xl px-4 border-white/20 shadow-lg" : "max-w-6xl px-6 border-transparent shadow-none"
@@ -72,6 +89,13 @@ export default function Navbar() {
           </svg>
         </a>
 
+        {/* Centered nav with Borrow/Earn/Dashboard */}
+        <nav className="hidden md:flex items-center gap-2">
+          <NavItem href="/testnet" label="Borrow" />
+          <NavItem href="/earn" label="Earn" />
+          <NavItem href="/dashboard" label="Dashboard" />
+        </nav>
+
         {/* Wallet button only */}
         <div className="flex items-center gap-3">
           <Button
@@ -88,7 +112,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Header - logo left, wallet right */}
+      {/* Mobile Header - logo left, compact nav on mobile, wallet right */}
       <header
         className={`fixed top-4 z-[9999] mx-4 flex w-auto items-center justify-between rounded-full backdrop-blur-md md:hidden px-4 py-3 border transition-all duration-300 ${
           isScrolled ? "border-white/20 shadow-lg" : "border-transparent shadow-none"
@@ -118,6 +142,14 @@ export default function Navbar() {
           <span className="text-white font-semibold">v0</span>
         </a>
 
+        {/* Compact nav on mobile */}
+        <nav className="hidden sm:flex items-center gap-2">
+          <NavItem href="/testnet" label="Borrow" />
+          <NavItem href="/earn" label="Earn" />
+          <NavItem href="/dashboard" label="Dashboard" />
+        </nav>
+
+        {/* Wallet button only */}
         <Button
           onClick={handleWalletConnect}
           size="sm"

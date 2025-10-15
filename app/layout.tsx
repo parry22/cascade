@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { Suspense } from "react"
 import { Inter } from "next/font/google"
+import Navbar from "@/components/Navbar"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -37,6 +38,7 @@ html {
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Suspense fallback={null}>
+            <Navbar />
             {children}
             <Toaster />
           </Suspense>
