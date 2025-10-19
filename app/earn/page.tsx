@@ -11,7 +11,7 @@ type Rwa = {
   available: number
   minLock: string
   risk: "Low" | "Medium" | "High"
-  image: string // added
+  image: string
 }
 
 const RWAS: Rwa[] = [
@@ -62,10 +62,10 @@ export default function EarnPage() {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 md:px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Earn</h1>
-        <p className="text-sm text-muted-foreground">Supply / stake your RWAs to earn yield.</p>
-      </header>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold">Earn</h1>
+        <p className="text-sm text-white/60 mt-2">Supply / stake your RWAs to earn yield.</p>
+      </div>
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {RWAS.map((a) => (

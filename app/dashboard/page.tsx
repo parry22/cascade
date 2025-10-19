@@ -5,10 +5,8 @@ type Position = {
   symbol: string
   name: string
   amountUSD: number
-  rate: number // APY for supply, APR for borrow
+  rate: number
 }
-
-const mockPortfolioValues = [300, 312, 320, 315, 330, 342, 355, 349, 361, 372, 381, 395]
 
 const positions: Position[] = [
   { side: "Supply", symbol: "UST", name: "US Treasuries (T-Bills)", amountUSD: 12.3, rate: 4.2 },
@@ -21,17 +19,17 @@ export default function DashboardPage() {
   const totalSupplied = positions.filter((p) => p.side === "Supply").reduce((s, p) => s + p.amountUSD, 0)
   const totalBorrowed = positions.filter((p) => p.side === "Borrow").reduce((s, p) => s + p.amountUSD, 0)
 
-  const latest = mockPortfolioValues.at(-1) ?? 0
-  const prev = mockPortfolioValues.at(-2) ?? latest
+  const latest = 395
+  const prev = 381
   const delta = latest - prev
   const pct = prev ? ((delta / prev) * 100).toFixed(2) : "0.00"
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 md:px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Aggregated view of your RWAs across the platform.</p>
-      </header>
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold">Dashboard</h1>
+        <p className="text-sm text-white/60 mt-2">Aggregated view of your RWAs across the platform.</p>
+      </div>
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-[20px] bg-muted/20 p-4">

@@ -7,10 +7,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { Suspense } from "react"
-import { Inter } from "next/font/google"
 import Navbar from "@/components/Navbar"
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -24,12 +21,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${inter.variable} antialiased`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
       <head>
         <style>{`
 html {
-  /* Geist primary with Inter fallback, strictly sans */
-  font-family: ${GeistSans.style.fontFamily}, ${inter.style.fontFamily}, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: ${GeistSans.style.fontFamily}, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-sans: ${GeistSans.variable};
   --font-mono: ${GeistMono.variable};
 }
@@ -39,7 +35,7 @@ html {
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Suspense fallback={null}>
             <Navbar />
-            {children}
+            <div className="pt-20">{children}</div>
             <Toaster />
           </Suspense>
         </ThemeProvider>

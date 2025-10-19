@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Navbar from "@/components/Navbar"
 import { toast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 
@@ -9,19 +8,18 @@ type RWAAsset = {
   symbol: string
   name: string
   price: number
-  tags: string[] // e.g., ["Treasuries"], ["Private Credit"], ["Real Estate"]
+  tags: string[]
   supply: number
   supplyUSD: number
   borrow: number
   borrowUSD: number
   supplyAPR: number
   borrowAPR: number
-  image: string // added
+  image: string
 }
 
 const FILTERS = ["All", "Treasuries", "Private Credit", "Real Estate", "Commodities", "RWA"]
 
-// New: module-scoped asset list used by the component
 const RWA_ASSETS: RWAAsset[] = [
   {
     symbol: "UST",
@@ -80,7 +78,6 @@ const RWA_ASSETS: RWAAsset[] = [
 type PositionMap = Record<string, { supplied: number; borrowed: number }>
 
 export default function RWALendingMarket() {
-  // Wallet sync with Navbar
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
 
@@ -99,7 +96,6 @@ export default function RWALendingMarket() {
     return () => window.removeEventListener("wallet-connection-change", onChange as EventListener)
   }, [])
 
-  // Filters and search
   const [activeFilter, setActiveFilter] = useState<string>("All")
   const [query, setQuery] = useState("")
 
@@ -114,9 +110,8 @@ export default function RWALendingMarket() {
     })
   }, [activeFilter, query])
 
-  // Positions and health
   const [positions, setPositions] = useState<PositionMap>({})
-  const [healthLtv, setHealthLtv] = useState(35) // affects "borrow limit" calc
+  const [healthLtv, setHealthLtv] = useState(35)
 
   const totals = useMemo(() => {
     const supplied = Object.values(positions).reduce((s, p) => s + (p.supplied || 0), 0)
@@ -126,12 +121,11 @@ export default function RWALendingMarket() {
     return { supplied, borrowed, netWorth, borrowLimit }
   }, [positions, healthLtv])
 
-  // Inline row action state
-  const [expandedRow, setExpandedRow] = useState<{ symbol: string; mode: "supply" | "borrow" } | null>(null)
+  const [expandedRow, setExpandedRow] = useState<{ symbol: string; mode: "buy" | "pledge" } | null>(null)
   const [actionAmount, setActionAmount] = useState<number>(0)
   const [loading, setLoading] = useState(false)
 
-  const openRow = (symbol: string, mode: "supply" | "borrow") => {
+  const openRow = (symbol: string, mode: "buy" | "pledge") => {
     setExpandedRow({ symbol, mode })
     setActionAmount(0)
   }
@@ -152,7 +146,7 @@ export default function RWALendingMarket() {
     const key = expandedRow.symbol
     setPositions((prev) => {
       const curr = prev[key] || { supplied: 0, borrowed: 0 }
-      if (expandedRow.mode === "supply") {
+      if (expandedRow.mode === "buy") {
         return { ...prev, [key]: { ...curr, supplied: curr.supplied + actionAmount } }
       } else {
         return { ...prev, [key]: { ...curr, borrowed: curr.borrowed + actionAmount } }
@@ -160,35 +154,38 @@ export default function RWALendingMarket() {
     })
     toast({
       title: "Action Simulated on Testnet",
-      description: `${expandedRow.mode === "supply" ? "Supplied" : "Borrowed"} $${actionAmount.toLocaleString()} ${expandedRow.symbol}`,
+      description: `${expandedRow.mode === "buy" ? "Bought" : "Pledged"} $${actionAmount.toLocaleString()} ${expandedRow.symbol}`,
     })
     setExpandedRow(null)
     setActionAmount(0)
   }
 
-  // Helpers
   const fmt = (n: number) => `$${n.toLocaleString()}`
   const fmtPct = (n: number) => `${n.toFixed(3)}%`
 
   return (
     <main className="relative min-h-screen bg-black text-white">
-      <Navbar />
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-10">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">Borrow</h1>
+          <p className="text-sm text-white/60 mt-2">Pledge your RWAs to borrow or buy more assets.</p>
+        </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-24 pb-10">
         {/* Top heading and summary metrics */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="text-3xl md:text-4xl font-bold">RWA Lending Market</h1>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+          <div className="text-lg font-semibold">RWA Lending Market</div>
           <div className="flex flex-wrap items-center gap-6 text-sm text-white/80">
             <div>
-              <span className="text-white/60">TVL</span> <span className="font-semibold">{fmt(626_950_000)}</span>
+              <span className="text-white/60">TVL</span>{" "}
+              <span className="font-semibold font-mono tabular-nums">{fmt(626_950_000)}</span>
             </div>
             <div>
               <span className="text-white/60">Total Supply</span>{" "}
-              <span className="font-semibold">{fmt(914_260_000)}</span>
+              <span className="font-semibold font-mono tabular-nums">{fmt(914_260_000)}</span>
             </div>
             <div>
               <span className="text-white/60">Total Borrow</span>{" "}
-              <span className="font-semibold">{fmt(287_300_000)}</span>
+              <span className="font-semibold font-mono tabular-nums">{fmt(287_300_000)}</span>
             </div>
           </div>
         </div>
@@ -197,8 +194,6 @@ export default function RWALendingMarket() {
         <div className="mt-6 grid grid-cols-1 items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_360px]">
           {/* Left: Table */}
           <section aria-label="RWA table" className="h-full">
-            {/* Keep height fill; only allow horizontal scroll on small screens.
-                 On md+ make x-overflow visible and remove forcing min-width. */}
             <div className="h-full rounded-xl bg-white/5 flex flex-col overflow-hidden">
               <div className="px-4 py-3 text-xs uppercase tracking-wide text-white/60 hidden md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px]">
                 <div>Assets</div>
@@ -208,15 +203,9 @@ export default function RWALendingMarket() {
                 <div>Borrow APR</div>
                 <div className="text-right pr-2">Actions</div>
               </div>
-              {/* Header + body inside horizontal scroll container for small screens */}
               <div className="flex-1 overflow-hidden">
-                {/* was: className="h-full overflow-x-auto"
-                            now: keep x-scroll on small, disable on md+ */}
                 <div className="h-full overflow-x-auto md:overflow-x-visible">
-                  {/* was: className="min-w-[920px] h-full flex flex-col"
-                              now: keep min-w only on small, fill width on md+ */}
                   <div className="min-w-[920px] md:min-w-0 md:w-full h-full flex flex-col">
-                    {/* Header row (visible on small screens too) */}
                     <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_160px] px-4 py-3 text-xs uppercase tracking-wide text-white/60 md:hidden">
                       <div>Assets</div>
                       <div>Supply</div>
@@ -225,7 +214,6 @@ export default function RWALendingMarket() {
                       <div>Borrow APR</div>
                       <div className="text-right pr-2">Actions</div>
                     </div>
-                    {/* Body */}
                     <div className="flex-1 overflow-y-auto divide-y divide-white/10">
                       {filtered.map((a) => {
                         const pos = positions[a.symbol] || { supplied: 0, borrowed: 0 }
@@ -244,56 +232,56 @@ export default function RWALendingMarket() {
                                 />
                                 <div className="min-w-0">
                                   <div className="truncate font-medium">{a.name}</div>
-                                  <div className="text-xs text-white/60">{fmt(a.price)}</div>
+                                  <div className="text-xs text-white/60 font-mono tabular-nums">{fmt(a.price)}</div>
                                 </div>
                               </div>
                               {/* Supply */}
                               <div className="min-w-0">
-                                <div className="truncate">{a.supply.toLocaleString()}</div>
-                                <div className="text-xs text-white/60">{fmt(a.supplyUSD)}</div>
+                                <div className="truncate font-mono tabular-nums">{a.supply.toLocaleString()}</div>
+                                <div className="text-xs text-white/60 font-mono tabular-nums">{fmt(a.supplyUSD)}</div>
                               </div>
                               {/* Borrow */}
                               <div className="min-w-0">
-                                <div className="truncate">{a.borrow.toLocaleString()}</div>
-                                <div className="text-xs text-white/60">{fmt(a.borrowUSD)}</div>
+                                <div className="truncate font-mono tabular-nums">{a.borrow.toLocaleString()}</div>
+                                <div className="text-xs text-white/60 font-mono tabular-nums">{fmt(a.borrowUSD)}</div>
                               </div>
                               {/* APRs */}
-                              <div className="min-w-0">{fmtPct(a.supplyAPR)}</div>
-                              <div className="min-w-0">{fmtPct(a.borrowAPR)}</div>
-                              {/* Actions */}
+                              <div className="min-w-0 font-mono tabular-nums">{fmtPct(a.supplyAPR)}</div>
+                              <div className="min-w-0 font-mono tabular-nums">{fmtPct(a.borrowAPR)}</div>
                               <div className="flex justify-end gap-2">
                                 <Button
                                   size="sm"
-                                  className="bg-white text-black hover:opacity-90"
-                                  onClick={() => openRow(a.symbol, "borrow")}
+                                  className="bg-white text-black hover:opacity-90 rounded-[20px]"
+                                  onClick={() => openRow(a.symbol, "buy")}
                                 >
-                                  Borrow
+                                  Buy {a.symbol}
                                 </Button>
                                 <Button
-                                  variant="outline"
                                   size="sm"
-                                  className="border-white/25 hover:bg-white/10 bg-transparent"
-                                  onClick={() => openRow(a.symbol, "supply")}
+                                  className="bg-white text-black hover:opacity-90 rounded-[20px]"
+                                  onClick={() => openRow(a.symbol, "pledge")}
                                 >
-                                  Supply
+                                  Pledge to Borrow
                                 </Button>
                               </div>
                             </div>
 
-                            {/* Inline row expander (no card borders) */}
+                            {/* Inline row expander */}
                             {isExpanded && (
                               <div className="pb-4">
                                 <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
                                   <div>
                                     <label className="mb-1 block text-xs text-white/70">
-                                      {expandedRow?.mode === "supply" ? "Supply Amount (USD)" : "Borrow Amount (USD)"}
+                                      {expandedRow?.mode === "buy"
+                                        ? `Buy ${a.symbol} (USD)`
+                                        : `Pledge ${a.symbol} to Borrow (USD)`}
                                     </label>
                                     <input
                                       type="number"
                                       min={0}
                                       value={actionAmount || ""}
                                       onChange={(e) => setActionAmount(Number(e.target.value))}
-                                      className="w-full bg-white/5 px-3 py-2 text-sm placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/30"
+                                      className="w-full bg-white/5 px-3 py-2 text-sm placeholder:text-white/50 focus:outline-none focus:ring-1 focus:ring-white/30 rounded-[20px]"
                                       placeholder="0.00"
                                     />
                                     <div className="mt-1 text-xs text-white/60">
@@ -304,7 +292,7 @@ export default function RWALendingMarket() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="border-white/25 hover:bg-white/10 bg-transparent"
+                                      className="border-white/25 hover:bg-white/10 bg-transparent rounded-[20px]"
                                       onClick={() => setExpandedRow(null)}
                                     >
                                       Cancel
@@ -315,8 +303,8 @@ export default function RWALendingMarket() {
                                       disabled={loading || !walletConnected}
                                       className={
                                         loading || !walletConnected
-                                          ? "bg-white/20 text-white/70 cursor-not-allowed"
-                                          : "bg-white text-black hover:opacity-90"
+                                          ? "bg-white/20 text-white/70 cursor-not-allowed rounded-[20px]"
+                                          : "bg-white text-black hover:opacity-90 rounded-[20px]"
                                       }
                                     >
                                       {loading ? "Processing…" : "Confirm"}
@@ -342,11 +330,11 @@ export default function RWALendingMarket() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-xs text-white/60">Net Worth</div>
-                  <div className="text-3xl font-bold">{fmt(totals.netWorth)}</div>
+                  <div className="text-3xl font-bold font-mono tabular-nums">{fmt(totals.netWorth)}</div>
                 </div>
                 <Button
                   size="sm"
-                  className="bg-white text-black font-semibold hover:opacity-90"
+                  className="bg-white text-black font-semibold hover:opacity-90 rounded-[20px]"
                   onClick={() => {
                     if (!walletConnected) {
                       toast({
@@ -365,11 +353,11 @@ export default function RWALendingMarket() {
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-xs text-white/60">Your Borrowed</div>
-                  <div className="text-lg font-semibold">{fmt(totals.borrowed)}</div>
+                  <div className="text-lg font-semibold font-mono tabular-nums">{fmt(totals.borrowed)}</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/60">Your Supplied</div>
-                  <div className="text-lg font-semibold">{fmt(totals.supplied)}</div>
+                  <div className="text-lg font-semibold font-mono tabular-nums">{fmt(totals.supplied)}</div>
                 </div>
               </div>
 
@@ -387,15 +375,17 @@ export default function RWALendingMarket() {
                 <div className="mt-2 grid grid-cols-3 text-xs text-white/60">
                   <div>
                     <div>H.F.</div>
-                    <div className="text-white">{(100 - healthLtv).toFixed(2)}</div>
+                    <div className="text-white font-mono tabular-nums">{(100 - healthLtv).toFixed(2)}</div>
                   </div>
                   <div>
                     <div>Borrow Limit</div>
-                    <div className="text-white">{fmt(totals.borrowLimit)}</div>
+                    <div className="text-white font-mono tabular-nums">{fmt(totals.borrowLimit)}</div>
                   </div>
                   <div>
                     <div>Liq. Level</div>
-                    <div className="text-white">{fmt(Math.max(0, totals.borrowed - totals.borrowLimit))}</div>
+                    <div className="text-white font-mono tabular-nums">
+                      {fmt(Math.max(0, totals.borrowed - totals.borrowLimit))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -406,20 +396,24 @@ export default function RWALendingMarket() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <div className="text-xs text-white/60">Available To Claim</div>
-                  <div className="text-lg font-semibold">$0.00</div>
+                  <div className="text-lg font-semibold font-mono tabular-nums">$0.00</div>
                 </div>
                 <div>
                   <div className="text-xs text-white/60">Total Rewards Claimed</div>
-                  <div className="text-lg font-semibold">$0.00</div>
+                  <div className="text-lg font-semibold font-mono tabular-nums">$0.00</div>
                 </div>
               </div>
               <div className="mt-3 flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 border-white/25 hover:bg-white/10 bg-transparent">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/25 hover:bg-white/10 bg-transparent rounded-[20px]"
+                >
                   Claim
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 bg-white text-black font-semibold hover:opacity-90"
+                  className="flex-1 bg-white text-black font-semibold hover:opacity-90 rounded-[20px]"
                   onClick={() => toast({ title: "Claim & Re-Allocate", description: "Simulated for testnet." })}
                 >
                   Claim & Re-Allocate
@@ -443,7 +437,7 @@ export default function RWALendingMarket() {
               </div>
               <div className="mt-3 space-y-2 text-sm">
                 {Object.entries(positions).length === 0 && (
-                  <div className="text-white/60">No positions yet. Supply or borrow to see them here.</div>
+                  <div className="text-white/60">No positions yet. Buy or pledge to see them here.</div>
                 )}
                 {Object.entries(positions).map(([sym, p]) => (
                   <div key={sym} className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2">
@@ -453,7 +447,7 @@ export default function RWALendingMarket() {
                       </div>
                       <div className="text-white/90">{sym}</div>
                     </div>
-                    <div className="text-xs text-white/70">
+                    <div className="text-xs text-white/70 font-mono tabular-nums">
                       Supplied {fmt(p.supplied)} • Borrowed {fmt(p.borrowed)}
                     </div>
                   </div>
@@ -463,7 +457,6 @@ export default function RWALendingMarket() {
           </aside>
         </div>
 
-        {/* Wallet overlay for entire page interactions (only blocks actions; UI remains visible) */}
         {!walletConnected && (
           <div className="pointer-events-none fixed bottom-6 right-6 z-10 rounded-lg bg-black/50 px-3 py-2 text-xs backdrop-blur">
             Connect Wallet to perform actions

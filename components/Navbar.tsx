@@ -15,8 +15,8 @@ export default function Navbar() {
     return (
       <Link
         href={href}
-        className={`rounded-[20px] px-3 py-1 text-sm transition-colors ${
-          active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-foreground/10"
+        className={`rounded-[20px] px-3 py-1 text-sm transition-all ${
+          active ? "bg-white text-black shadow-lg shadow-white/30" : "text-muted-foreground hover:bg-foreground/10"
         }`}
       >
         {label}
